@@ -1,9 +1,13 @@
-import streamlit as st
+import os
 import requests
+import streamlit as st
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Configuration
-API_KEY = "6931081f8e74ccd1b3b003e99c454c1d"
-owm = OpenWeatherMap(API_KEY)
+API_KEY = os.getenv("API_KEY")
+base_url = os.getenv("base_url")
 
 # --- App Title ---
 st.title("Weather Comparison App")
@@ -18,16 +22,21 @@ for i in range(5):
 if st.button("Get Weather Data"):
     weather_data = []
     for city in cities:
-        try:
-            mgr = owm.weather_at_place(city)
-            weather = mgr.weather()
+        complete_url = f"{base_url}q={city}&appid={API_KEY}&units=metric"
+        # Send the GET request
+        response = requests.get(complete_url)
+        data = response.json()
+
+        # Check if the request was successful
+        if response.status_code == 200:
+            # Extract temperature from the response
+            temperature = data['main']['temp']
             weather_data.append({
                 'city': city,
-                'temperature': weather.temperature('celsius')['temp'],
-                'humidity': weather.humidity
+                'temperature': temperature,
+                'humidity': "pippo"
             })
-        except Exception as e:
-            st.error(f"Error fetching data for {city}: {e}")
+
 
 # --- Scatter Plot ---
 if weather_data:
