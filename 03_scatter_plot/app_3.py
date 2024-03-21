@@ -1,7 +1,10 @@
 import os
+import random
 import requests
+import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
+import plotly.express as px
 
 load_dotenv()
 
@@ -19,6 +22,7 @@ for i in range(5):
     cities.append(city_input)
 
 # --- Fetch Weather Data ---
+weather_data = []
 if st.button("Get Weather Data"):
     weather_data = []
     for city in cities:
@@ -31,15 +35,16 @@ if st.button("Get Weather Data"):
         if response.status_code == 200:
             # Extract temperature from the response
             temperature = data['main']['temp']
+            humidity = data['main']['humidity']
             weather_data.append({
                 'city': city,
                 'temperature': temperature,
-                'humidity': "pippo"
+                'humidity': humidity
             })
 
 
 # --- Scatter Plot ---
 if weather_data:
-    import pandas as pd
     df = pd.DataFrame(weather_data)
-    st.plotly_chart(df.plot(kind='scatter', x='temperature', y='humidity', title='Temperature vs. Humidity'))
+    fig = px.scatter(df, x='temperature', y='humidity', title='Temperature vs. Humidity', labels={'temperature': 'Temperature (°C)', 'humidity': 'Humidity (%)'})
+    st.plotly_chart(fig)
