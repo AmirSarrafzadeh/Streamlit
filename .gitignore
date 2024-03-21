@@ -1,4 +1,14 @@
 .env
 *.env
+*.log
+venv
+.idea
+__pycache__
+files
+*.ini
+*.db
 
-/sl
+/sl/
+/.idea/
+/__pycache__/
+/files/
