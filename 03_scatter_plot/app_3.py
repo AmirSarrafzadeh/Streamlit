@@ -4,18 +4,18 @@ import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
 import plotly.express as px
-import pycountry
 
 load_dotenv()
 
 # Configuration
 API_KEY = os.getenv("API_KEY")
 base_url = os.getenv("base_url")
+country_url = os.getenv("country_url")
 
 # Get country names
-countries = [country.name for country in pycountry.countries]
+country_list = requests.get(country_url).json()
+countries = [country_list['data'][i]['country'] for i in range(len(country_list['data']))]
 
-# --- App Title ---
 st.markdown("<h1 style='text-align: center; color: red;'>Weather Application</h1>", unsafe_allow_html=True)
 st.markdown(
     """
@@ -71,6 +71,11 @@ if st.button("Get Weather Data"):
 # --- Scatter Plot ---
 if weather_data:
     df = pd.DataFrame(weather_data)
+    # Calculate min/max humidity with padding
+    min_humidity = df['humidity'].min() - df['humidity'].min() * 0.1
+    max_humidity = df['humidity'].max() + df['humidity'].max() * 0.1
+
     fig = px.scatter(df, x='temperature', y='humidity', color='country', title='Temperature vs. Humidity', labels={'temperature': 'Temperature (°C)', 'humidity': 'Humidity (%)'})
+    fig.update_layout(yaxis_range=[min_humidity, max_humidity])
     st.plotly_chart(fig)
 
