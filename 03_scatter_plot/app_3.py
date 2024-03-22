@@ -72,8 +72,8 @@ if st.button("Get Weather Data"):
 if weather_data:
     df = pd.DataFrame(weather_data)
     # Calculate min/max humidity with padding
-    min_humidity = df['humidity'].min() - df['humidity'].min() * 0.1
-    max_humidity = df['humidity'].max() + df['humidity'].max() * 0.1
+    min_humidity = df['humidity'].min() - df['humidity'].min() * 0.05
+    max_humidity = df['humidity'].max() + df['humidity'].max() * 0.05
 
     fig = px.scatter(df, x='temperature', y='humidity', color='country', title='Temperature vs. Humidity', labels={'temperature': 'Temperature (°C)', 'humidity': 'Humidity (%)'})
     fig.update_layout(yaxis_range=[min_humidity, max_humidity])
