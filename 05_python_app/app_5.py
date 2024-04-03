@@ -61,7 +61,6 @@ if st.button("Run Code"):
         exec(code_input)
         output_value = stdout_buffer.getvalue()
 
-        # Reset sys.stdout to its original value
         sys.stdout = sys.__stdout__
 
         st.write("Output:")
