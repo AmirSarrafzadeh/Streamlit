@@ -49,7 +49,6 @@ st.markdown("""
             </div>
             """, unsafe_allow_html=True)
 
-# Variable Input and Testing Area
 st.subheader("Python Code Simulator")
 code_input = st.text_area("Write your Python code here:", height=200)
 
