@@ -1,3 +1,5 @@
+import io
+import sys
 import streamlit as st
 
 # Create a sidebar and a tab
@@ -47,31 +49,24 @@ st.markdown("""
             </div>
             """, unsafe_allow_html=True)
 
-import io
-import sys
-
 # Variable Input and Testing Area
 st.subheader("Python Code Simulator")
 code_input = st.text_area("Write your Python code here:", height=200)
 
 if st.button("Run Code"):
     try:
-        # Capture the output in a buffer
         stdout_buffer = io.StringIO()
         sys.stdout = stdout_buffer
 
-        # Execute the provided code
         exec(code_input)
-
-        # Get the captured output as a string
         output_value = stdout_buffer.getvalue()
 
         # Reset sys.stdout to its original value
         sys.stdout = sys.__stdout__
 
-        # Display the captured output
         st.write("Output:")
-        st.write(output_value)
+        for line in output_value.split("\n"):
+            st.write(line)
 
     except Exception as e:
         st.error(f"An error occurred: {e}")
