@@ -13,9 +13,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 zoomcamp_expander = st.sidebar.expander("Variables Documentation")
+selected_tab = st.sidebar.radio("Select a Tab:", ["Python Documentation", "Tasks"])
 
-with zoomcamp_expander:
-    zoomcamp_tab = st.empty()
+
+if selected_tab == "Python Documentation":
     st.subheader("Variables in Python")
     st.write("**Strings:**")
     st.code('name = "Alice"')
@@ -29,6 +30,23 @@ with zoomcamp_expander:
     st.code('course_modules = ["Benz", "BMW", "Audi"]')
     st.write("**Dictionaries:**")
     st.code('student = {"name": "Bob", "city": "New York"}')
+
+elif selected_tab == "Tasks":
+    task_expander = st.sidebar.expander("Tasks")
+    with task_expander:
+        task_1 = st.button("Task 01")
+        task_2 = st.button("Task 02")
+        task_3 = st.button("Task 03")
+
+    st.markdown("<h1 style='text-align: center;'>Tasks</h1>", unsafe_allow_html=True)
+
+    # Logic to handle what happens when clicking on each task button
+    if task_1:
+        st.markdown("You clicked Task 01. (Page content for Task 01 would go here)")
+    elif task_2:
+        st.markdown("You clicked Task 02. (Page content for Task 02 would go here)")
+    elif task_3:
+        st.markdown("You clicked Task 03. (Page content for Task 03 would go here)")
 
 st.markdown("<h1 style='text-align: center;'>Python Course</h1>", unsafe_allow_html=True)
 
@@ -68,3 +86,4 @@ if st.button("Run Code"):
 
     except Exception as e:
         st.error(f"An error occurred: {e}")
+
