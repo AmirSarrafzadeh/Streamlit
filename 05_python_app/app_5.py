@@ -12,7 +12,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-zoomcamp_expander = st.sidebar.expander("Variables definitions")
+zoomcamp_expander = st.sidebar.expander("Variables Documentation")
 
 with zoomcamp_expander:
     zoomcamp_tab = st.empty()
