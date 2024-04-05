@@ -10,8 +10,9 @@ pd.set_option('display.max_rows', None)
 
 # Pattern to extract coordinates
 pattern = r'(\d+\.\d+) (\d+\.\d+)'
-ICON_URL1 = "https://icons.iconarchive.com/icons/matiasam/ios7-style/256/Clear-Tick-icon.png"
-ICON_URL2 = "https://icons.iconarchive.com/icons/custom-icon-design/flatastic-9/256/Accept-icon.png"
+ICON_URL1 = "https://img.icons8.com/offices/30/000000/visit.png"
+ICON_URL2 = "https://img.icons8.com/external-flat-icons-inmotus-design/67/external-Point-road-sign-flat-icons-inmotus-design.png"
+
 
 # Icon data for the starting and other points
 icon_data1 = {
@@ -149,7 +150,7 @@ shortest_layer = pdk.Layer(
 render_map = pdk.Deck(
     map_style=selected_basemap_url,
     initial_view_state=view_state,
-    layers=[shortest_layer, circle_layer],
+    layers=[circle_layer, shortest_layer]
 )
 
 st.pydeck_chart(render_map)
