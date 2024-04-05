@@ -10,16 +10,16 @@ pd.set_option('display.max_rows', None)
 
 # Pattern to extract coordinates
 pattern = r'(\d+\.\d+) (\d+\.\d+)'
-ICON_URL1 = "https://raw.githubusercontent.com/AmirSarrafzadeh/Streamlit/main/04_routing_app/red_star.png"
-ICON_URL2 = "https://img.icons8.com/external-flat-icons-inmotus-design/67/external-Point-road-sign-flat-icons-inmotus-design.png"
+ICON_URL1 = "https://raw.githubusercontent.com/AmirSarrafzadeh/Streamlit/main/04_routing_app/Star12.png"
+ICON_URL2 = "https://raw.githubusercontent.com/AmirSarrafzadeh/Streamlit/main/04_routing_app/Star14.png"
 
 
 # Icon data for the starting and other points
 icon_data1 = {
     "url": ICON_URL1,
-    "width": 250,
-    "height": 250,
-    "anchorY": 250,
+    "width": 150,
+    "height": 150,
+    "anchorY": 150,
 }
 
 icon_data2 = {
@@ -39,6 +39,7 @@ def extract_coordinates(line):
 def extract_coordinates_1(string):
     coords = string.strip("[]").split("], [")
     return [[float(coord.split()[0]), float(coord.split()[1])] for coord in coords]
+
 
 # Defining the file paths
 file_path = os.path.dirname(__file__)
@@ -109,7 +110,7 @@ circle_layer = pdk.Layer(
     data=points_data,
     get_position=["lon", "lat"],
     get_icon="icon_data",
-    get_size=1.5,
+    get_size=1.75,
     size_scale=10,
     pickable=True,
 )

@@ -4,7 +4,7 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/sl" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.12 (Streamlit)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.12 (amir) (3)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
