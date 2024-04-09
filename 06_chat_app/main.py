@@ -24,6 +24,9 @@ def main():
         response = respond(user_input, language)
         st.text_area("Bot's response:", value=response, height=100)
 
+    # Add robot image to the bottom of sidebar
+    st.sidebar.image("robot.png", use_column_width=True)
+
 
 if __name__ == "__main__":
     main()
