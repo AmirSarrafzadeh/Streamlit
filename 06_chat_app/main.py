@@ -1,11 +1,23 @@
 import streamlit as st
+from transformers import pipeline
+
+# Load the pre-trained model for question answering
+nlp = pipeline("question-answering")
 
 
 # Define a function to respond to user input
 def respond(input_text, language):
-    # Here you can implement the logic of your chatbot
-    # For simplicity, let's just echo the user's input
-    return f"You said: {input_text} (in {language})"
+    # Here we handle both normal messages and questions
+    if "?" in input_text:
+        # If it's a question, use the NLP model to generate an answer
+        response = nlp({
+            "question": input_text,
+            "context": "This is a dummy context for the question-answering model. You can replace it with your own context."
+        })
+        return response["answer"]
+    else:
+        # If it's a normal message, echo it back
+        return f"You said: {input_text} (in {language})"
 
 
 # Streamlit UI
@@ -23,6 +35,10 @@ def main():
         # Respond to user's input
         response = respond(user_input, language)
         st.text_area("Bot's response:", value=response, height=100)
+
+    # Add space between sidebar content and image
+    st.sidebar.markdown("---")  # Add a horizontal line
+    st.sidebar.markdown("&nbsp;")  # Add a non-breaking space (equivalent to 30px)
 
     # Add robot image to the bottom of sidebar
     st.sidebar.image("robot.png", use_column_width=True)
