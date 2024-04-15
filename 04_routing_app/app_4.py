@@ -29,11 +29,13 @@ icon_data2 = {
     "anchorY": 150,
 }
 
+
 # Functions to extract coordinates from the geometry column of the GeoDataFrame and convert them to a list of lists
 def extract_coordinates(line):
     coordinates = re.findall(pattern, str(line))
     formatted_coordinates = [f'[{coord[0]} {coord[1]}]' for coord in coordinates]
     return ', '.join(formatted_coordinates)
+
 
 # Function to extract the float coordinates from the string coordinates and convert them to a list of lists
 def extract_coordinates_1(string):
