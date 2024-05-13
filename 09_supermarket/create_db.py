@@ -48,7 +48,7 @@ def create_tables(server_name, database_name):
         );''',
         '''CREATE TABLE warehouse (
             product_id VARCHAR(50) PRIMARY KEY NOT NULL,
-            product_amount VARCHAR(50) NOT NULL,
+            product_amount INTEGER NOT NULL,
             FOREIGN KEY (product_id) REFERENCES products(id)
         );''',
         '''CREATE TABLE customers (

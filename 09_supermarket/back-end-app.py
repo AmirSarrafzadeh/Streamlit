@@ -1,14 +1,43 @@
+"""
+The back-end-app.py file is the FastAPI application that will be used to interact with the database.
+The application will have several endpoints to insert records into the database tables. The application will also serve an image in full-screen mode when the root URL is accessed.
+
+Author: Your full name
+Date: 2024-05-13
+
+Preconditions:
+1. FastAPI is installed.
+2. The necessary python libraries are installed. You can use requirements.txt to install them.
+
+Procedure:
+1. Import the necessary libraries.
+2. Read the configuration file to get the database connection details.
+3. Create a FastAPI application.
+4. Define the data models for the warehouse record, product, producer, customer, staff, buy record, and sell record.
+5. Define the endpoint to serve an image in full-screen mode.
+6. Define the endpoint to get the image.
+7. Define the endpoint to insert a warehouse record.
+8. Define the endpoint to insert a product.
+9. Define the endpoint to insert a producer.
+10. Define the endpoint to insert a customer.
+11. Define the endpoint to insert a staff member.
+12. Define the endpoint to insert a buy record.
+13. Define the endpoint to insert a sell record.
+14. Run the FastAPI application.
+"""
+
+# Import necessary libraries
 import io
 import os
 import sys
 import pyodbc
 import logging
+import uvicorn
 import configparser
+from pyodbc import OperationalError
 from fastapi import FastAPI, HTTPException
-from pyodbc import connect, OperationalError, ProgrammingError
-from starlette.responses import HTMLResponse, FileResponse
+from starlette.responses import FileResponse
 from fastapi.responses import HTMLResponse, StreamingResponse
-from datetime import datetime
 from pydantic import BaseModel
 
 # Check if the folder exists
@@ -22,6 +51,7 @@ else:
 logging.basicConfig(filename='./logs/backend.log', level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Read the configuration file to get the database connection details
 try:
     config = configparser.ConfigParser()
     config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
@@ -34,14 +64,15 @@ except Exception as e:
     logging.error("Error reading config file: " + str(e))
     sys.exit()
 
+# Create a FastAPI application
 app = FastAPI()
 
-
+# Define the data models for the warehouse record
 class WarehouseRecord(BaseModel):
     product_id: str
     product_amount: int
 
-
+# Define the data models for the product
 class Product(BaseModel):
     id: str
     product_name: str
@@ -49,7 +80,7 @@ class Product(BaseModel):
     producer_id: str
     product_category: str
 
-
+# Define the data models for the producer
 class Producer(BaseModel):
     id: str
     name: str
@@ -57,7 +88,7 @@ class Producer(BaseModel):
     company_name: str
     phone: str
 
-
+# Define the data models for the customer
 class Customer(BaseModel):
     id: str
     name: str
@@ -65,14 +96,14 @@ class Customer(BaseModel):
     phone: str
     address: str
 
-
+# Define the data models for the staff
 class Staff(BaseModel):
     id: str
     name: str
     surname: str
     position: str
 
-
+# Define the data models for the buy record
 class BuyRecord(BaseModel):
     id: str
     producer_id: str
@@ -80,7 +111,7 @@ class BuyRecord(BaseModel):
     quantity: int
     paid: str
 
-
+# Define the data models for the sell record
 class SellRecord(BaseModel):
     id: str
     customer_id: str
@@ -88,7 +119,7 @@ class SellRecord(BaseModel):
     quantity: int
     paid: str
 
-
+# Function to get the database connection
 def get_database_connection():
     try:
         conn_string = f'DRIVER={{SQL Server}};SERVER={server_name};DATABASE={database_name}'
@@ -97,7 +128,7 @@ def get_database_connection():
     except OperationalError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
+# Define the endpoint to serve an image in full-screen mode
 @app.get("/")
 async def show_fullscreen_image():
     html_content = """
@@ -125,20 +156,20 @@ async def show_fullscreen_image():
     """
     return HTMLResponse(content=html_content, status_code=200)
 
-
+# Define the endpoint to get the image
 @app.get("/image")
 async def get_image():
     with open("./images/get.jpg", "rb") as f:
         image_data = f.read()
     return StreamingResponse(io.BytesIO(image_data), media_type="image/jpeg")
 
-
+# Define the endpoint to get the favicon
 @app.get("/favicon.ico")
 async def get_favicon():
     # Return a default favicon.ico file
     return FileResponse("ai.ico")
 
-
+# Define the endpoint to insert a warehouse record
 @app.post("/insert-warehouse-record/")
 def insert_warehouse_record(warehouse_record: WarehouseRecord):
     conn = get_database_connection()
@@ -158,7 +189,7 @@ def insert_warehouse_record(warehouse_record: WarehouseRecord):
         conn.close()
     return {"status": "success", "message": "Warehouse record inserted successfully"}
 
-
+# Define the endpoint to insert a product
 @app.post("/insert-product/")
 def insert_product(product: Product):
     conn = get_database_connection()
@@ -177,7 +208,7 @@ def insert_product(product: Product):
         conn.close()
     return {"status": "success", "message": "Product inserted successfully"}
 
-
+# Define the endpoint to insert a producer
 @app.post("/insert-producer/")
 def insert_producer(producer: Producer):
     conn = get_database_connection()
@@ -196,7 +227,7 @@ def insert_producer(producer: Producer):
         conn.close()
     return {"status": "success", "message": "Producer inserted successfully"}
 
-
+# Define the endpoint to insert a customer
 @app.post("/insert-customer/")
 def insert_customer(customer: Customer):
     conn = get_database_connection()
@@ -215,7 +246,7 @@ def insert_customer(customer: Customer):
         conn.close()
     return {"status": "success", "message": "Customer inserted successfully"}
 
-
+# Define the endpoint to insert a staff member
 @app.post("/insert-staff/")
 def insert_staff(staff: Staff):
     conn = get_database_connection()
@@ -235,7 +266,7 @@ def insert_staff(staff: Staff):
         conn.close()
     return {"status": "success", "message": "Staff member inserted successfully"}
 
-
+# Define the endpoint to insert a buy record
 @app.post("/insert-buy-record/")
 def insert_buy_record(buy_record: BuyRecord):
     conn = get_database_connection()
@@ -260,7 +291,7 @@ def insert_buy_record(buy_record: BuyRecord):
         conn.close()
     return {"status": "success", "message": "Buy record inserted and warehouse updated successfully"}
 
-
+# Define the endpoint to insert a sell record
 @app.post("/insert-sell-record/")
 def insert_sell_record(sell_record: SellRecord):
     conn = get_database_connection()
@@ -287,6 +318,5 @@ def insert_sell_record(sell_record: SellRecord):
 
 
 if __name__ == "__main__":
-    import uvicorn
-
+    # Run the FastAPI application
     uvicorn.run(app, host="127.0.0.1", port=8000)
