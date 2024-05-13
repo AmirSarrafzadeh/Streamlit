@@ -1,20 +1,20 @@
+# Backend API with FastAPI
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime, time
-import uvicorn
+from pymongo import MongoClient
 
 app = FastAPI()
 
-# Database to store booked study places
-booked_study_places = {}
-
-# Database to store borrowed books
-borrowed_books = {}
+# MongoDB connection
+client = MongoClient("mongodb://localhost:27017/")
+db = client["library"]
+study_places_collection = db["study_places"]
+books_collection = db["books"]
 
 # Dummy database of available books
 available_books = {"Book1": True, "Book2": False, "Book3": True}
-
 
 class StudyPlaceBooking(BaseModel):
     matricola: int = Field(..., description="Matricola of the student")
@@ -32,34 +32,40 @@ class BookBorrowing(BaseModel):
 @app.post("/book_study_place")
 def book_study_place(booking: StudyPlaceBooking):
     # Check if the study place is already booked for the given time slot
-    for place in booked_study_places.values():
-        if (booking.date == place.date and
-                ((booking.start_time >= place.start_time and booking.start_time < place.end_time) or
-                 (booking.end_time > place.start_time and booking.end_time <= place.end_time))):
-            raise HTTPException(status_code=400, detail="Study place already booked for this time slot")
+    existing_booking = study_places_collection.find_one({
+        "date": booking.date,
+        "$or": [
+            {"start_time": {"$lt": booking.start_time}, "end_time": {"$gt": booking.start_time}},
+            {"start_time": {"$lt": booking.end_time}, "end_time": {"$gt": booking.end_time}}
+        ]
+    })
+
+    if existing_booking:
+        raise HTTPException(status_code=400, detail="Study place already booked for this time slot")
 
     # Add the booking to the database
-    booking_info = booking.dict()
-    booked_study_places[booking_info["matricola"]] = booking_info
+    booking_data = booking.dict()
+    study_places_collection.insert_one(booking_data)
     return {"message": "Study place booked successfully"}
 
 
 @app.post("/borrow_book")
 def borrow_book(borrowing: BookBorrowing):
     # Check if the book is available
-    if borrowing.book_name not in available_books or not available_books[borrowing.book_name]:
+    book_status = books_collection.find_one({"name": borrowing.book_name})
+    if not book_status or not book_status["available"]:
         raise HTTPException(status_code=400, detail="Book is not available for borrowing")
 
     # Borrow the book
-    available_books[borrowing.book_name] = False
-    borrowed_books[borrowing.book_name] = datetime.now()
+    books_collection.update_one({"name": borrowing.book_name}, {"$set": {"available": False}})
     return {"message": f"Book '{borrowing.book_name}' borrowed successfully"}
 
 
 @app.get("/check_book_existence")
 def check_book_existence(book_name: str):
-    if book_name in available_books:
-        return {"message": f"Book '{book_name}' {'is' if available_books[book_name] else 'is not'} available"}
+    book_status = books_collection.find_one({"name": book_name})
+    if book_status:
+        return {"message": f"Book '{book_name}' {'is' if book_status['available'] else 'is not'} available"}
     else:
         raise HTTPException(status_code=404, detail="Book not found")
 
@@ -67,11 +73,16 @@ def check_book_existence(book_name: str):
 @app.get("/check_study_place_availability")
 def check_study_place_availability(date: datetime, start_time: time, end_time: time):
     # Check if the study place is available for the given time slot
-    for place in booked_study_places.values():
-        if (date == place["date"] and
-                ((start_time >= place["start_time"] and start_time < place["end_time"]) or
-                 (end_time > place["start_time"] and end_time <= place["end_time"]))):
-            return {"message": "Study place is not available"}
+    existing_booking = study_places_collection.find_one({
+        "date": date,
+        "$or": [
+            {"start_time": {"$lt": start_time}, "end_time": {"$gt": start_time}},
+            {"start_time": {"$lt": end_time}, "end_time": {"$gt": end_time}}
+        ]
+    })
+
+    if existing_booking:
+        return {"message": "Study place is not available"}
 
     return {"message": "Study place is available"}
 
@@ -79,12 +90,16 @@ def check_study_place_availability(date: datetime, start_time: time, end_time: t
 # Dummy function to reset the databases
 @app.post("/reset_databases")
 def reset_databases():
-    global booked_study_places, borrowed_books, available_books
-    booked_study_places = {}
-    borrowed_books = {}
-    available_books = {"Book1": True, "Book2": False, "Book3": True}
+    study_places_collection.drop()
+    books_collection.drop()
+    study_places_collection.insert_many([])
+    books_collection.insert_many([
+        {"name": "Book1", "available": True},
+        {"name": "Book2", "available": False},
+        {"name": "Book3", "available": True}
+    ])
     return {"message": "Databases reset successfully"}
 
-
 if __name__ == "__main__":
+    import uvicorn
     uvicorn.run(app, host="localhost", port=8000)

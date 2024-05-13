@@ -1,3 +1,4 @@
+# Frontend with Streamlit
 import streamlit as st
 import requests
 from datetime import datetime, time
@@ -36,26 +37,16 @@ def book_study_place():
             if response.status_code == 200:
                 st.success("Booking successful!")
             else:
-                st.error(f"Failed to book study place: {response.json()['detail']}")
+                try:
+                    error_detail = response.json()["detail"]
+                except Exception as e:
+                    error_detail = str(e)
+                st.error(f"Failed to book study place: {error_detail}")
         else:
             st.error("Please fill in all the required information.")
 
-# Sidebar for borrowing a book
-def borrow_book():
-    st.sidebar.header("Borrow a Book")
-    # Add necessary inputs and functionality for borrowing a book
+# Similar functions for borrowing books, checking book existence, and checking study place availability
 
-# Sidebar for checking if a book exists
-def check_book_existence():
-    st.sidebar.header("Check Book Existence")
-    # Add necessary inputs and functionality for checking if a book exists
-
-# Sidebar for checking the availability of study places
-def check_study_place_availability():
-    st.sidebar.header("Check Study Place Availability")
-    # Add necessary inputs and functionality for checking the availability of study places
-
-# Main function
 def main():
     st.title("Library Web Application")
 
@@ -66,13 +57,7 @@ def main():
 
     if sidebar_option == "Book Study Place":
         book_study_place()
-    elif sidebar_option == "Borrow a Book":
-        borrow_book()
-    elif sidebar_option == "Check Book Existence":
-        check_book_existence()
-    elif sidebar_option == "Check Study Place Availability":
-        check_study_place_availability()
-
+    # Add similar conditions for other options
 
 if __name__ == "__main__":
     main()
