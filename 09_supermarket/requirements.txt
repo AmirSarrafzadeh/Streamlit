@@ -1,0 +1,7 @@
+fastapi==0.111.0
+pandas==2.2.2
+pydantic==2.7.1
+pyodbc==5.1.0
+starlette==0.37.2
+streamlit==1.32.2
+uvicorn==0.29.0

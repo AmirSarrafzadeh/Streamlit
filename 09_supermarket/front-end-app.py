@@ -23,6 +23,7 @@ import sys
 import pyodbc
 import base64
 import logging
+import datetime
 import pandas as pd
 import configparser
 import streamlit as st
@@ -47,6 +48,7 @@ try:
     driver_name = config['config']['driver_name']
     server_name = config['config']['server_name']
     database_name = config['config']['database_name']
+    database_name2 = config['config']['database_name2']
     logging.info("Config file read successfully")
 except Exception as e:
     logging.error("Error reading config file: " + str(e))
@@ -102,9 +104,18 @@ def get_database_connection():
     except pyodbc.OperationalError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+def get_database_connection_2():
+    try:
+        conn_string = f'DRIVER={{SQL Server}};SERVER={server_name};DATABASE={database_name2}'
+        connection = pyodbc.connect(conn_string)
+        return connection
+    except pyodbc.OperationalError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 # Get the database connection using the function
 connection_variable = get_database_connection()
+connection_variable2 = get_database_connection_2()
 
 # Streamlit UI Layout
 st.sidebar.title("Happy  Supermarket 🏪")
@@ -385,7 +396,7 @@ elif choice == "Staff":
     st.sidebar.markdown('<div style="margin-bottom: 200px;"></div>', unsafe_allow_html=True)
     st.sidebar.image("./images/staff_icon.png", use_column_width=True, caption="Staff")
 elif choice == "Product":
-    product_option = st.sidebar.radio("Choose Action", ["Insert", "View", "Update", "Delete"])
+    product_option = st.sidebar.radio("Choose Action", ["Insert", "View", "Update", "Delete", "Actions"])
     set_background_image("./images/Product.jpg")
 
     if product_option == "Insert":
@@ -414,7 +425,11 @@ elif choice == "Product":
                 cursor = connection_variable.cursor()
                 cursor.execute("INSERT INTO products (id, product_name, product_price, producer_id, product_category) VALUES (?, ?, ?, ?, ?);",
                                (id, product_name, product_price, producer_id, product_category))
+
+                cursor2 = connection_variable2.cursor()
+                cursor2.execute("INSERT INTO actions (id, action, timestamp) VALUES (?, ?, ?);", (id, "Product Inserted", datetime.datetime.now()))
                 connection_variable.commit()
+                connection_variable2.commit()
                 st.success("Product added successfully!")
 
     elif product_option == "View":
@@ -450,7 +465,10 @@ elif choice == "Product":
         if st.button("Update Product"):
             cursor = connection_variable.cursor()
             cursor.execute(f"UPDATE products SET {column} = ? WHERE id = ?;", (new_value, id))
+            cursor2 = connection_variable2.cursor()
+            cursor2.execute("INSERT INTO actions (id, action, timestamp) VALUES (?, ?, ?);", (id, "Product Updated", datetime.datetime.now()))
             connection_variable.commit()
+            connection_variable2.commit()
             st.success("Product updated successfully!")
 
     elif product_option == "Delete":
@@ -461,12 +479,29 @@ elif choice == "Product":
         id = st.selectbox("Choose a product ID to Delete", product_ids)
         if st.button("Delete Product"):
             cursor = connection_variable.cursor()
+            cursor2 = connection_variable2.cursor()
             cursor.execute("DELETE FROM products WHERE id = ?;", (id,))
+            cursor2.execute("INSERT INTO actions (id, action, timestamp) VALUES (?, ?, ?);", (id, "Product Deleted", datetime.datetime.now()))
             connection_variable.commit()
+            connection_variable2.commit()
             st.success("Product deleted successfully!")
+
+    elif product_option == "Actions":
+        st.subheader("Actions")
+        cursor = connection_variable2.cursor()
+        cursor.execute("SELECT * FROM actions;")
+        data = cursor.fetchall()
+        if data:
+            flattened_data = [tuple(item for item in row) for row in data]
+            col_names = [column[0] for column in cursor.description]
+            df = pd.DataFrame(flattened_data, columns=col_names)
+            st.dataframe(df, width=1600)
+        else:
+            st.error("No data found.")
 
     st.sidebar.markdown('<div style="margin-bottom: 200px;"></div>', unsafe_allow_html=True)
     st.sidebar.image("./images/product_icon.png", use_column_width=True, caption="Product")
+
 elif choice == "Warehouse":
     st.subheader("Warehouse Stock")
     set_background_image("./images/Warehouse.jpg")
